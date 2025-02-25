@@ -1,12 +1,14 @@
-
-//import tester.*;
-import java.util.function.*;
+import tester.*;
 import java.util.ArrayList;
+import java.util.*;
+
+
 
 // represents Huffman
 class Huffman {
     ArrayList<ITree> forest;
-    // constructor for Huffmaan
+    
+    // convenience constructor
     Huffman(ArrayList<String> strs, ArrayList<Integer> frequency) {
         if (strs.size() != frequency.size()) {
             throw new IllegalArgumentException("List of strings and list of frequencies are "
@@ -17,123 +19,75 @@ class Huffman {
             throw new IllegalArgumentException("List of strings must have at least"
                     + "2 elements!");
         }
-
+        
+        // initiates a forest/ list of trees
+        this.forest = new ArrayList<ITree>();
+        
+        // adds new leaves with the frequency and character from the Huffman constructor
         for (int i = 0; i < strs.size(); i+=1) {
-            
-
+            this.forest.add(new Leaf(frequency.get(i), strs.get(i)));
         }
 
+        // sorts this new list
+        this.forest.sort(new CompareITreeValue());
     }
 
-    void sort() {
+}
 
+// comparator for two trees
+class CompareITreeValue implements Comparator<ITree> {
+    
+  // compares the values of two trees
+  public int compare(ITree t1, ITree t2) {
+    int difference = t1.calculateVal() - t2.calculateVal();
+    if (difference < 0) {
+      return -1;
     }
+    if (difference > 0) {
+      return 1;
+    }
+    return difference;
+  }
 }
 
 // represents a tree
 interface ITree {
-    // IForest sort();
-    void insertIntoSortedForest(ArrayList<ITree> forest);
-    
-    boolean greaterVal(ITree otherTree);
-
-    boolean lesserValNode(Node n);
-
-    boolean lesserValLeaf(Leaf l);
-}
-
-abstract class ATree implements ITree {
-    int value;
-
-    ATree(int value) {
-        this.value = value;
-    }
-    
-    public void insertIntoSortedForest(ArrayList<ITree> forest) {
-        for (int i = 0; i < forest.size(); i += 1) {
-            if (!this.greaterVal(forest.get(i))) {
-                forest.insert(i, this);
-            }
-        }
-    }
-    
-    public boolean greaterVal(ITree otherTree) {
-        this.value > otherTree.value;
-    }
-
-    public abstract boolean lesserValNode(Node n);
-    
-    public abstract boolean lesserValLeaf(Leaf l);
-
+    int calculateVal();
 }
 
 // represents a tree node
-class Node extends ATree {
+class Node implements ITree {
     ITree left;
     ITree right;
 
     // constructor for Node
-    Node(int value, ITree left, ITree right) {
-        super(value);
+    Node(ITree left, ITree right) {
         this.left = left;
         this.right = right;
     }
-
-    public boolean greaterVal(ITree otherTree) {
-        return otherTree.lesserValNode(this);
+    
+    // calculates value of node
+    public int calculateVal() {
+      return this.left.calculateVal() + this.right.calculateVal();
     }
 
-    public boolean lesserValNode(Node n) {
-        return this.combinedValue < n.combinedValue;
-    }
-
-    public boolean lesserValLeaf(Leaf l) {
-        return this.combinedValue < l.value;
-    }
-
-    // 2 3 4 5 want to insert 1
-    // forest.get(i=0) = 2
-    // 1 < 2 ?
-    // true
-    // insert where 2 is
-    // 1 2 3 4 5
-    // 2 2 3 4 5 want to insert 2
-    //
-    public void insertIntoSortedForest(ArrayList<ITree> forest) {
-        for (int i = 0; i < forest.size(); i += 1) {
-            if (!this.greaterVal(forest.get(i))) {
-                forest.insert(i, this);
-            }
-        }
-    }
+    
 }
 
 // represents a tree leaf
-class Leaf extends ATree {
+class Leaf implements ITree {
+    int value;
     String letter;
+
     // constructor for leaf
     Leaf(int value, String letter) {
-        super(value);
+        this.value = value;
         this.letter = letter;
     }
-
-    public boolean greaterVal(ITree otherTree) {
-        return otherTree.lesserValLeaf(this);
-    }
     
-    public boolean lesserValNode(Node n) {
-        return this.value < n.combinedValue;
+    // calculates value of leaf
+    public int calculateVal() {
+      return this.value;
     }
 
-    public boolean lesserValLeaf(Leaf l) {
-        return this.value < l.value;
-    }
-
-    public void insertIntoSortedForest(ArrayList<ITree> forest) {
-        for (int i = 0; i < forest.size(); i += 1) {
-            if (!this.greaterVal(forest.get(i))) {
-                forest.insert(i, this);
-            }
-        }
-    }
 }
